@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button divide;
     Button history;
     Button equals;
+    Button clear;
 
     TextView inputField;
     TextView calcHistory;
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-// Creating conection between buttons and main.Activity
+// Creating connection between buttons and main.Activity
 
         one = (Button) (findViewById(R.id.one_button));
         two = (Button) (findViewById(R.id.two_button));
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         history = (Button) (findViewById(R.id.getHistory));
         equals = (Button) (findViewById(R.id.equals_button));
+        clear = (Button) (findViewById(R.id.clear_button));
 
         inputField = (TextView) (findViewById(R.id.InputScreen));
         calcHistory = (TextView) (findViewById(R.id.historyView));
@@ -68,16 +70,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View view) {
 
+/* When user clicks on Advanced history button following things happen:
+    -Calculator mode changes to 1 i.e advanced mode
+    -button text changes to standard-no history
+    -history textview becomes visible and displays history
+ */
                 if(calculatorMode==0){
                     calculatorMode=1;
                     calcHistory.setVisibility(View.VISIBLE);
                     history.setText("STANDARD - NO HISTORY");
+                    calcHistory.setText("");// initially, textview should be empty
                 }
+  /* When user clicks on standard history button following things happen:
+    -Calculator mode changes to 0 i.e standard mode
+    -button text changes to Advanced-history
+    -history textview becomes invisible and text is set to ""
+ */
+
                 else {
                     calculatorMode=0;
                     calcHistory.setVisibility(View.INVISIBLE);
                     history.setText("ADVANCED - WITH HISTORY");
+                    obj.storedCalcHistory.clear();
+                    obj.historyArrayIndex=0;
+                    obj.joined="";
+                    obj.historyJoinedString="";
                 }
+            }
+        });
+
+        clear.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                inputField.setText("0");
+                obj.inputString.clear();
+                obj.index=0;
+                obj.joined = "";
             }
         });
 
@@ -102,73 +129,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if(v==equals){
-            System.out.println("**************");
             int result = obj.calculate();
-            //System.out.println("Equals pressed");
            String resultString = String.valueOf(result);
-           System.out.println(resultString);
-           inputField.setText(resultString);
+           inputField.setText(obj.joined+"="+obj.finalOutput);
+
+           /* In adnvanced mode, equals button, when pressed should display calculation history
+                in the history textview*/
+           if(calculatorMode==1){
+               obj.storeHistory();
+               calcHistory.setText(obj.storedCalcHistory.toString()
+                       .replace("[","")
+                       .replace("]","")
+                       .replace(",",""));
+           }
         }
         else{
-            /*switch (v.getId()){
-                case R.id.one_button:
-                    obj.push("1");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.two_button:
-                    obj.push("2");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.three_button:
-                    obj.push("3");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.plus_button:
-                    obj.push("+");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.four_button:
-                    obj.push("4");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.five_button:
-                    obj.push("5");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.six_button:
-                    obj.push("6");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.minus_button:
-                    obj.push("-");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.seven_button:
-                    obj.push("7");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.eight_button:
-                    obj.push("8");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.nine_button:
-                    obj.push("9");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.times_button:
-                    obj.push("*");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.zero_button:
-                    obj.push("0");
-                    inputField.setText(obj.joined);
-                    break;
-                case R.id.divide_button:
-                    obj.push("/");
-                    inputField.setText(obj.joined);
-                    break;
-
-            }*/
             // Getting text of the button pressed
             String data = ((Button) v).getText().toString();
             obj.push(data);
